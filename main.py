@@ -34,11 +34,12 @@ async def detect(file: UploadFile = File(...)):
     filepath.write_bytes(content)
 
     try:
-        detections, result_filename = run_detection(str(filepath), str(RESULTS_DIR))
+        result = run_detection(str(filepath), str(RESULTS_DIR))
     finally:
         filepath.unlink(missing_ok=True)
 
     return {
-        "detections": detections,
-        "image_url": f"/results/{result_filename}"
+        "detections": result["detections"],
+        "image_url": f"/results/{result['output_filename']}",
+        "stats": result["stats"]
     }
