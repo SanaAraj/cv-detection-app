@@ -11,7 +11,6 @@ def run_detection(image_path: str, output_dir: str = "results") -> tuple[list[di
 
     img = cv2.imread(image_path)
     h, w = img.shape[:2]
-    scale = 1.0
     if max(h, w) > MAX_SIZE:
         scale = MAX_SIZE / max(h, w)
         img = cv2.resize(img, (int(w * scale), int(h * scale)))
