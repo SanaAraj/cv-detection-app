@@ -4,12 +4,12 @@ Real-time object detection web application using YOLO11.
 
 ## Overview
 
-Upload an image through the web interface and get back an annotated version with bounding boxes, class labels, and confidence scores. The app uses YOLO11n (nano) for fast inference without requiring a GPU.
+Upload an image through the web interface and get back an annotated version with bounding boxes, class labels, and confidence scores. The app uses YOLO11s (small) for accurate detection without requiring a GPU.
 
 ## How It Works
 
 1. Upload an image via the web interface
-2. YOLO11n runs detection on the image
+2. YOLO11s runs detection on the image
 3. The app returns the annotated image with detected objects highlighted
 
 ## Setup
@@ -32,7 +32,7 @@ Open http://localhost:8000 in your browser. Upload an image and click "Detect Ob
 
 ## Model
 
-The app uses YOLO11n (nano), the smallest and fastest variant of YOLO11. The model is pretrained on COCO dataset and can detect 80 different object classes including people, vehicles, animals, and common household items.
+The app uses YOLO11s (small), a balanced variant of YOLO11 that offers good accuracy while remaining fast. The model is pretrained on COCO dataset and can detect 80 different object classes including people, vehicles, animals, and common household items.
 
 Model weights are downloaded automatically on first run.
 
