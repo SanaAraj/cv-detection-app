@@ -1,11 +1,21 @@
 from pathlib import Path
+import uuid
 from ultralytics import YOLO
 import cv2
 
 model = YOLO("yolo11n.pt")
+MAX_SIZE = 1920
 
 def run_detection(image_path: str, output_dir: str = "results") -> tuple[list[dict], str]:
     Path(output_dir).mkdir(exist_ok=True)
+
+    img = cv2.imread(image_path)
+    h, w = img.shape[:2]
+    scale = 1.0
+    if max(h, w) > MAX_SIZE:
+        scale = MAX_SIZE / max(h, w)
+        img = cv2.resize(img, (int(w * scale), int(h * scale)))
+        cv2.imwrite(image_path, img)
 
     results = model(image_path)[0]
 
@@ -24,7 +34,8 @@ def run_detection(image_path: str, output_dir: str = "results") -> tuple[list[di
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    output_filename = f"detected_{Path(image_path).name}"
+    ext = Path(image_path).suffix
+    output_filename = f"detected_{uuid.uuid4()}{ext}"
     output_path = str(Path(output_dir) / output_filename)
     cv2.imwrite(output_path, img)
 
