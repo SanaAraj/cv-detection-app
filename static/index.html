@@ -4,264 +4,429 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Object Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8f9fa;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 3rem 1.5rem;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .container { max-width: 850px; margin: 0 auto; }
+
         h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #111827;
             text-align: center;
-            margin-bottom: 30px;
-            color: #333;
         }
-        .upload-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 40px;
+        .subtitle {
+            font-size: 14px;
+            color: #6b7280;
             text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-card {
             background: #fff;
-            cursor: pointer;
-            transition: border-color 0.2s;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
         }
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #666;
-        }
-        .upload-area p {
-            color: #666;
-            margin-bottom: 15px;
-        }
-        .upload-area input {
-            display: none;
-        }
-        .preview {
-            max-width: 100%;
-            max-height: 300px;
-            margin-top: 20px;
-            border-radius: 4px;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: #333;
-            color: #fff;
-            border: none;
+        .upload-zone {
+            border: 2px dashed #d1d5db;
             border-radius: 8px;
-            font-size: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .upload-zone svg { margin-bottom: 1rem; }
+        .upload-zone p {
+            font-size: 15px;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        .upload-zone small {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .upload-zone input { display: none; }
+
+        .preview-container {
+            display: none;
+            text-align: center;
+        }
+        .preview-container.visible { display: block; }
+        .preview-img {
+            max-height: 350px;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        .file-info {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        .remove-btn {
+            font-size: 13px;
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .remove-btn:hover { color: #dc2626; }
+
+        .detect-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 1rem;
+            background: #1f2937;
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .btn:hover { background: #555; }
-        .btn:disabled {
-            background: #ccc;
+        .detect-btn:hover { background: #374151; }
+        .detect-btn:disabled {
+            background: #9ca3af;
             cursor: not-allowed;
         }
-        .results {
-            margin-top: 30px;
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            display: none;
-        }
-        .results.visible { display: block; }
-        .results h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .result-image {
-            width: 100%;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .detections {
-            list-style: none;
-        }
-        .detections li {
-            padding: 10px;
-            background: #f9f9f9;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .confidence {
-            color: #666;
-        }
-        .message {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #333;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .error {
-            color: #c00;
-            background: #fee;
-            padding: 15px;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-msg {
+            margin-top: 1rem;
+            padding: 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
             border-radius: 8px;
-            margin-top: 20px;
+            color: #dc2626;
+            font-size: 14px;
+            text-align: center;
             display: none;
         }
-        .error.visible { display: block; }
+        .error-msg.visible { display: block; }
+
+        .results {
+            margin-top: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: none;
+        }
+        .results.visible { display: block; opacity: 1; }
+
+        .result-image-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .result-image-card img {
+            width: 100%;
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 1rem;
+        }
+        .stat-card {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .detections-section { margin-top: 1.5rem; }
+        .detections-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+        .detection-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+            gap: 12px;
+        }
+        .detection-row:last-child { border-bottom: none; }
+        .class-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .class-badge {
+            font-size: 13px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .confidence-bar-container {
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .confidence-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .confidence-value {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .no-detections {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        .no-detections svg { margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Object Detection</h1>
+        <p class="subtitle">Upload an image to detect and classify objects in real time</p>
 
-        <div class="upload-area" id="uploadArea">
-            <p>Drop an image here or click to upload</p>
-            <input type="file" id="fileInput" accept="image/*">
-            <img class="preview" id="preview" style="display: none;">
+        <div class="upload-card">
+            <div class="upload-zone" id="uploadZone">
+                <svg width="48" height="48" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.39 4.5 4.5 0 013.12 8.19.75.75 0 01-.23.024H6.75z"/>
+                </svg>
+                <p>Drop an image here or click to upload</p>
+                <small>JPG, PNG, WEBP up to 10MB</small>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <img class="preview-img" id="previewImg">
+                <div class="file-info" id="fileInfo"></div>
+                <button class="remove-btn" id="removeBtn">Remove</button>
+            </div>
         </div>
 
-        <button class="btn" id="detectBtn" disabled>Detect Objects</button>
+        <button class="detect-btn" id="detectBtn" disabled>
+            <span id="btnText">Detect Objects</span>
+        </button>
 
-        <div class="error" id="error"></div>
+        <div class="error-msg" id="errorMsg"></div>
 
         <div class="results" id="results">
-            <h2>Results</h2>
-            <div class="loading" id="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p>Processing...</p>
+            <div class="result-image-card">
+                <img id="resultImg">
             </div>
-            <img class="result-image" id="resultImage" style="display: none;">
-            <ul class="detections" id="detections"></ul>
-            <p class="message" id="noResults" style="display: none;">No objects detected</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="objectCount">0</div>
+                    <div class="stat-label">Objects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="classCount">0</div>
+                    <div class="stat-label">Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="inferenceTime">0s</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+
+            <div class="detections-section">
+                <h3 class="detections-title">Detections</h3>
+                <div id="detectionsList"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const uploadArea = document.getElementById('uploadArea');
+        const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImg = document.getElementById('previewImg');
+        const fileInfo = document.getElementById('fileInfo');
+        const removeBtn = document.getElementById('removeBtn');
         const detectBtn = document.getElementById('detectBtn');
+        const btnText = document.getElementById('btnText');
+        const errorMsg = document.getElementById('errorMsg');
         const results = document.getElementById('results');
-        const loading = document.getElementById('loading');
-        const resultImage = document.getElementById('resultImage');
-        const detections = document.getElementById('detections');
-        const noResults = document.getElementById('noResults');
-        const errorDiv = document.getElementById('error');
+        const resultImg = document.getElementById('resultImg');
+        const objectCount = document.getElementById('objectCount');
+        const classCount = document.getElementById('classCount');
+        const inferenceTime = document.getElementById('inferenceTime');
+        const detectionsList = document.getElementById('detectionsList');
 
         let selectedFile = null;
+        let isProcessing = false;
 
-        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('click', () => !isProcessing && fileInput.click());
 
-        uploadArea.addEventListener('dragover', (e) => {
+        uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.classList.add('dragover');
+            if (!isProcessing) uploadZone.classList.add('dragover');
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 
-        uploadArea.addEventListener('drop', (e) => {
+        uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files[0]) {
-                handleFile(e.dataTransfer.files[0]);
-            }
+            uploadZone.classList.remove('dragover');
+            if (!isProcessing && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
         });
 
         fileInput.addEventListener('change', () => {
-            if (fileInput.files[0]) {
-                handleFile(fileInput.files[0]);
-            }
+            if (fileInput.files[0]) handleFile(fileInput.files[0]);
         });
 
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showError('Please upload an image file');
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showError('Please upload a JPG, PNG, or WEBP image.');
                 return;
             }
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be under 10MB.');
+                return;
+            }
+
             selectedFile = file;
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = 'block';
+            previewImg.src = URL.createObjectURL(file);
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            fileInfo.textContent = `${file.name} (${sizeMB} MB)`;
+
+            uploadZone.style.display = 'none';
+            previewContainer.classList.add('visible');
             detectBtn.disabled = false;
             hideError();
             results.classList.remove('visible');
         }
 
-        detectBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-
-            hideError();
-            results.classList.add('visible');
-            loading.style.display = 'block';
-            resultImage.style.display = 'none';
-            detections.innerHTML = '';
-            noResults.style.display = 'none';
+        removeBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            previewContainer.classList.remove('visible');
+            uploadZone.style.display = 'block';
             detectBtn.disabled = true;
+            results.classList.remove('visible');
+        });
+
+        detectBtn.addEventListener('click', async () => {
+            if (!selectedFile || isProcessing) return;
+
+            isProcessing = true;
+            detectBtn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Detecting...';
+            hideError();
+            results.classList.remove('visible');
 
             const formData = new FormData();
             formData.append('file', selectedFile);
 
             try {
-                const response = await fetch('/detect', {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch('/detect', { method: 'POST', body: formData });
                 const data = await response.json();
-
-                loading.style.display = 'none';
-                detectBtn.disabled = false;
 
                 if (data.error) {
                     showError(data.error);
-                    results.classList.remove('visible');
                     return;
                 }
 
-                resultImage.src = data.image_url;
-                resultImage.style.display = 'block';
+                resultImg.src = data.image_url;
+                objectCount.textContent = data.stats.object_count;
+                classCount.textContent = data.stats.class_count;
+                inferenceTime.textContent = data.stats.inference_time + 's';
 
+                detectionsList.innerHTML = '';
                 if (data.detections.length === 0) {
-                    noResults.style.display = 'block';
+                    detectionsList.innerHTML = `
+                        <div class="no-detections">
+                            <svg width="40" height="40" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                            </svg>
+                            <p>No objects detected</p>
+                        </div>
+                    `;
                 } else {
                     data.detections.forEach(det => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${det.class}</span><span class="confidence">${(det.confidence * 100).toFixed(1)}%</span>`;
-                        detections.appendChild(li);
+                        const conf = det.confidence;
+                        const pct = (conf * 100).toFixed(1);
+                        const barColor = conf > 0.8 ? '#22c55e' : conf > 0.6 ? '#f59e0b' : '#ef4444';
+                        const lightColor = det.color.replace('rgb', 'rgba').replace(')', ',0.15)');
+
+                        const row = document.createElement('div');
+                        row.className = 'detection-row';
+                        row.innerHTML = `
+                            <span class="class-dot" style="background:${det.color}"></span>
+                            <span class="class-badge" style="background:${lightColor};color:${det.color}">${det.class}</span>
+                            <div class="confidence-bar-container">
+                                <div class="confidence-bar" style="width:${pct}%;background:${barColor}"></div>
+                            </div>
+                            <span class="confidence-value">${pct}%</span>
+                        `;
+                        detectionsList.appendChild(row);
                     });
                 }
+
+                results.classList.add('visible');
             } catch (err) {
-                loading.style.display = 'none';
-                detectBtn.disabled = false;
                 showError('Something went wrong. Please try again.');
+            } finally {
+                isProcessing = false;
+                detectBtn.disabled = false;
+                btnText.textContent = 'Detect Objects';
             }
         });
 
         function showError(msg) {
-            errorDiv.textContent = msg;
-            errorDiv.classList.add('visible');
+            errorMsg.textContent = msg;
+            errorMsg.classList.add('visible');
         }
 
         function hideError() {
-            errorDiv.classList.remove('visible');
+            errorMsg.classList.remove('visible');
         }
     </script>
 </body>
