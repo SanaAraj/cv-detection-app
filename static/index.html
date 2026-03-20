@@ -4,280 +4,397 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Object Detection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-            padding: 3rem 1.5rem;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .container { max-width: 850px; margin: 0 auto; }
 
-        h1 {
-            font-size: 26px;
-            font-weight: 600;
-            color: #111827;
-            text-align: center;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
-        .subtitle {
-            font-size: 14px;
-            color: #6b7280;
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
             text-align: center;
-            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111;
+            margin-top: 6px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #71717a;
+            margin-top: 8px;
+            line-height: 1.5;
         }
 
         .upload-card {
             background: #fff;
-            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed #d4d4d8;
             border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #6366f1;
+            background: #f5f3ff;
+        }
+
+        .upload-zone.has-image {
+            border: 1px solid #e5e7eb;
+            border-style: solid;
             padding: 1.5rem;
         }
-        .upload-zone {
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            padding: 3rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-        .upload-zone svg { margin-bottom: 1rem; }
-        .upload-zone p {
-            font-size: 15px;
-            color: #6b7280;
-            margin-bottom: 0.25rem;
-        }
-        .upload-zone small {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-        .upload-zone input { display: none; }
 
-        .preview-container {
-            display: none;
-            text-align: center;
+        .upload-icon {
+            pointer-events: none;
         }
-        .preview-container.visible { display: block; }
-        .preview-img {
-            max-height: 350px;
+
+        .upload-text {
+            font-size: 15px;
+            color: #52525b;
+            margin-top: 1rem;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: #a1a1aa;
+            margin-top: 4px;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .preview-area {
+            display: none;
+        }
+
+        .preview-area.visible {
+            display: block;
+        }
+
+        .preview-image {
+            max-height: 380px;
+            width: auto;
             max-width: 100%;
             object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
         }
-        .file-info {
+
+        .file-meta {
+            margin-top: 12px;
             font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
+            text-align: center;
         }
-        .remove-btn {
+
+        .file-name {
+            color: #71717a;
+        }
+
+        .file-size {
+            color: #a1a1aa;
+        }
+
+        .remove-link {
+            display: inline-block;
+            margin-top: 8px;
             font-size: 13px;
             color: #ef4444;
+            cursor: pointer;
             background: none;
             border: none;
-            cursor: pointer;
+            text-decoration: none;
+            transition: text-decoration 0.15s;
+        }
+
+        .remove-link:hover {
             text-decoration: underline;
         }
-        .remove-btn:hover { color: #dc2626; }
 
-        .detect-btn {
+        .action-btn {
             width: 100%;
-            padding: 14px;
+            height: 52px;
             margin-top: 1rem;
-            background: #1f2937;
+            background: #6366f1;
             color: #fff;
             font-family: inherit;
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 600;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
         }
-        .detect-btn:hover { background: #374151; }
-        .detect-btn:disabled {
-            background: #9ca3af;
+
+        .action-btn:hover:not(:disabled) {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .action-btn:disabled {
+            background: #d4d4d8;
+            color: #a1a1aa;
             cursor: not-allowed;
         }
+
         .spinner {
+            display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid #fff;
-            border-top-color: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .error-msg {
-            margin-top: 1rem;
-            padding: 12px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            color: #dc2626;
-            font-size: 14px;
+            font-size: 13px;
+            color: #ef4444;
             text-align: center;
+            margin-top: 8px;
             display: none;
         }
-        .error-msg.visible { display: block; }
+
+        .error-msg.visible {
+            display: block;
+        }
 
         .results {
-            margin-top: 2rem;
-            opacity: 0;
-            transition: opacity 0.3s;
             display: none;
+            margin-top: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        .results.visible { display: block; opacity: 1; }
 
-        .result-image-card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            overflow: hidden;
+        .results.visible {
+            display: block;
+            opacity: 1;
         }
-        .result-image-card img {
+
+        .result-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .result-card img {
             width: 100%;
             display: block;
         }
 
-        .stats-grid {
+        .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
             margin-top: 1rem;
         }
-        .stat-card {
-            background: #f9fafb;
-            border-radius: 10px;
+
+        .stat-box {
+            background: #fff;
+            border-radius: 12px;
             padding: 1rem;
             text-align: center;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: #111827;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
 
-        .detections-section { margin-top: 1.5rem; }
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detections-section {
+            margin-top: 1.5rem;
+        }
+
         .detections-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #111827;
+            color: #111;
             margin-bottom: 0.75rem;
         }
+
         .detection-row {
             display: flex;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f4f4f5;
         }
-        .detection-row:last-child { border-bottom: none; }
-        .class-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
+
+        .detection-row:last-child {
+            border-bottom: none;
         }
+
         .class-badge {
-            font-size: 13px;
-            padding: 3px 10px;
-            border-radius: 6px;
+            font-size: 12px;
             font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
         }
-        .confidence-bar-container {
+
+        .confidence-bar {
             flex: 1;
             height: 6px;
-            background: #e5e7eb;
+            background: #f4f4f5;
             border-radius: 3px;
             overflow: hidden;
+            margin: 0 16px;
         }
-        .confidence-bar {
+
+        .confidence-fill {
             height: 100%;
             border-radius: 3px;
-            transition: width 0.3s;
+            transition: width 0.5s ease;
         }
+
         .confidence-value {
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             color: #374151;
-            min-width: 50px;
+            min-width: 48px;
             text-align: right;
         }
 
         .no-detections {
             text-align: center;
-            padding: 2rem;
-            color: #6b7280;
+            padding: 2.5rem 1rem;
+            color: #a1a1aa;
+            font-size: 14px;
         }
-        .no-detections svg { margin-bottom: 0.5rem; }
+
+        .no-detections-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Object Detection</h1>
-        <p class="subtitle">Upload an image to detect and classify objects in real time</p>
+        <header class="header">
+            <div class="eyebrow">AI-Powered</div>
+            <h1 class="title">Object Detection</h1>
+            <p class="subtitle">Upload any image to detect, classify, and count objects instantly</p>
+        </header>
 
         <div class="upload-card">
             <div class="upload-zone" id="uploadZone">
-                <svg width="48" height="48" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.39 4.5 4.5 0 013.12 8.19.75.75 0 01-.23.024H6.75z"/>
-                </svg>
-                <p>Drop an image here or click to upload</p>
-                <small>JPG, PNG, WEBP up to 10MB</small>
+                <div class="default-content" id="defaultContent">
+                    <svg class="upload-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="4"/>
+                        <path d="M12 16V8m0 0l-3.5 3.5M12 8l3.5 3.5"/>
+                    </svg>
+                    <div class="upload-text">Drop image here or browse</div>
+                    <div class="upload-hint">Supports JPG, PNG, WEBP</div>
+                </div>
+                <div class="preview-area" id="previewArea">
+                    <img class="preview-image" id="previewImage">
+                    <div class="file-meta">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="remove-link" id="removeBtn">Remove</button>
+                </div>
                 <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
-            </div>
-            <div class="preview-container" id="previewContainer">
-                <img class="preview-img" id="previewImg">
-                <div class="file-info" id="fileInfo"></div>
-                <button class="remove-btn" id="removeBtn">Remove</button>
             </div>
         </div>
 
-        <button class="detect-btn" id="detectBtn" disabled>
-            <span id="btnText">Detect Objects</span>
+        <button class="action-btn" id="actionBtn" disabled>
+            <span id="btnContent">Detect Objects</span>
         </button>
 
-        <div class="error-msg" id="errorMsg"></div>
+        <div class="error-msg" id="errorMsg">Detection failed. Please try again.</div>
 
         <div class="results" id="results">
-            <div class="result-image-card">
-                <img id="resultImg">
+            <div class="result-card">
+                <img id="resultImage" alt="Detection result">
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="objectCount">0</div>
+            <div class="stats-row" id="statsRow">
+                <div class="stat-box">
+                    <div class="stat-value" id="statObjects">0</div>
                     <div class="stat-label">Objects</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="classCount">0</div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statClasses">0</div>
                     <div class="stat-label">Classes</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="inferenceTime">0s</div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statTime">0s</div>
                     <div class="stat-label">Time</div>
                 </div>
             </div>
 
-            <div class="detections-section">
-                <h3 class="detections-title">Detections</h3>
+            <div class="detections-section" id="detectionsSection">
+                <div class="detections-title">Detections</div>
                 <div id="detectionsList"></div>
+            </div>
+
+            <div class="no-detections" id="noDetections" style="display:none;">
+                <div class="no-detections-icon">🔍</div>
+                <div>No objects detected in this image</div>
             </div>
         </div>
     </div>
@@ -285,36 +402,71 @@
     <script>
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewImg = document.getElementById('previewImg');
-        const fileInfo = document.getElementById('fileInfo');
+        const defaultContent = document.getElementById('defaultContent');
+        const previewArea = document.getElementById('previewArea');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
         const removeBtn = document.getElementById('removeBtn');
-        const detectBtn = document.getElementById('detectBtn');
-        const btnText = document.getElementById('btnText');
+        const actionBtn = document.getElementById('actionBtn');
+        const btnContent = document.getElementById('btnContent');
         const errorMsg = document.getElementById('errorMsg');
         const results = document.getElementById('results');
-        const resultImg = document.getElementById('resultImg');
-        const objectCount = document.getElementById('objectCount');
-        const classCount = document.getElementById('classCount');
-        const inferenceTime = document.getElementById('inferenceTime');
+        const resultImage = document.getElementById('resultImage');
+        const statsRow = document.getElementById('statsRow');
+        const statObjects = document.getElementById('statObjects');
+        const statClasses = document.getElementById('statClasses');
+        const statTime = document.getElementById('statTime');
+        const detectionsSection = document.getElementById('detectionsSection');
         const detectionsList = document.getElementById('detectionsList');
+        const noDetections = document.getElementById('noDetections');
+
+        const classColors = [
+            { bg: '#ede9fe', text: '#6d28d9' },
+            { bg: '#dbeafe', text: '#1d4ed8' },
+            { bg: '#d1fae5', text: '#047857' },
+            { bg: '#fef3c7', text: '#b45309' },
+            { bg: '#fce7f3', text: '#be185d' },
+            { bg: '#e0e7ff', text: '#3730a3' },
+            { bg: '#ccfbf1', text: '#0f766e' },
+            { bg: '#fee2e2', text: '#b91c1c' }
+        ];
+
+        const classColorMap = {};
+        let colorIndex = 0;
+
+        function getClassColor(className) {
+            if (!classColorMap[className]) {
+                classColorMap[className] = classColors[colorIndex % classColors.length];
+                colorIndex++;
+            }
+            return classColorMap[className];
+        }
 
         let selectedFile = null;
-        let isProcessing = false;
+        let isLoading = false;
 
-        uploadZone.addEventListener('click', () => !isProcessing && fileInput.click());
+        uploadZone.addEventListener('click', (e) => {
+            if (e.target === removeBtn || isLoading) return;
+            fileInput.click();
+        });
 
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            if (!isProcessing) uploadZone.classList.add('dragover');
+            if (!isLoading) uploadZone.classList.add('dragover');
         });
 
-        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+        });
 
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.classList.remove('dragover');
-            if (!isProcessing && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            if (!isLoading && e.dataTransfer.files[0]) {
+                handleFile(e.dataTransfer.files[0]);
+            }
         });
 
         fileInput.addEventListener('change', () => {
@@ -327,98 +479,111 @@
                 showError('Please upload a JPG, PNG, or WEBP image.');
                 return;
             }
-            if (file.size > 10 * 1024 * 1024) {
-                showError('File size must be under 10MB.');
-                return;
-            }
 
             selectedFile = file;
-            previewImg.src = URL.createObjectURL(file);
-            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            fileInfo.textContent = `${file.name} (${sizeMB} MB)`;
+            previewImage.src = URL.createObjectURL(file);
 
-            uploadZone.style.display = 'none';
-            previewContainer.classList.add('visible');
-            detectBtn.disabled = false;
+            const size = file.size < 1024 * 1024
+                ? (file.size / 1024).toFixed(1) + ' KB'
+                : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+            fileName.textContent = file.name;
+            fileSize.textContent = ' · ' + size;
+
+            defaultContent.style.display = 'none';
+            previewArea.classList.add('visible');
+            uploadZone.classList.add('has-image');
+            actionBtn.disabled = false;
             hideError();
             results.classList.remove('visible');
         }
 
-        removeBtn.addEventListener('click', () => {
-            selectedFile = null;
-            fileInput.value = '';
-            previewContainer.classList.remove('visible');
-            uploadZone.style.display = 'block';
-            detectBtn.disabled = true;
-            results.classList.remove('visible');
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetUpload();
         });
 
-        detectBtn.addEventListener('click', async () => {
-            if (!selectedFile || isProcessing) return;
-
-            isProcessing = true;
-            detectBtn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> Detecting...';
-            hideError();
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            previewArea.classList.remove('visible');
+            defaultContent.style.display = 'block';
+            uploadZone.classList.remove('has-image');
+            actionBtn.disabled = true;
             results.classList.remove('visible');
+            colorIndex = 0;
+            Object.keys(classColorMap).forEach(k => delete classColorMap[k]);
+        }
+
+        actionBtn.addEventListener('click', async () => {
+            if (!selectedFile || isLoading) return;
+
+            isLoading = true;
+            actionBtn.disabled = true;
+            btnContent.innerHTML = '<span class="spinner"></span>Analyzing...';
+            hideError();
 
             const formData = new FormData();
             formData.append('file', selectedFile);
 
             try {
-                const response = await fetch('/detect', { method: 'POST', body: formData });
-                const data = await response.json();
+                const res = await fetch('/detect', { method: 'POST', body: formData });
+                const data = await res.json();
 
                 if (data.error) {
                     showError(data.error);
                     return;
                 }
 
-                resultImg.src = data.image_url;
-                objectCount.textContent = data.stats.object_count;
-                classCount.textContent = data.stats.class_count;
-                inferenceTime.textContent = data.stats.inference_time + 's';
-
-                detectionsList.innerHTML = '';
-                if (data.detections.length === 0) {
-                    detectionsList.innerHTML = `
-                        <div class="no-detections">
-                            <svg width="40" height="40" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-                            </svg>
-                            <p>No objects detected</p>
-                        </div>
-                    `;
-                } else {
-                    data.detections.forEach(det => {
-                        const conf = det.confidence;
-                        const pct = (conf * 100).toFixed(1);
-                        const barColor = conf > 0.8 ? '#22c55e' : conf > 0.6 ? '#f59e0b' : '#ef4444';
-                        const lightColor = det.color.replace('rgb', 'rgba').replace(')', ',0.15)');
-
-                        const row = document.createElement('div');
-                        row.className = 'detection-row';
-                        row.innerHTML = `
-                            <span class="class-dot" style="background:${det.color}"></span>
-                            <span class="class-badge" style="background:${lightColor};color:${det.color}">${det.class}</span>
-                            <div class="confidence-bar-container">
-                                <div class="confidence-bar" style="width:${pct}%;background:${barColor}"></div>
-                            </div>
-                            <span class="confidence-value">${pct}%</span>
-                        `;
-                        detectionsList.appendChild(row);
-                    });
-                }
-
-                results.classList.add('visible');
+                renderResults(data);
             } catch (err) {
-                showError('Something went wrong. Please try again.');
+                showError('Detection failed. Please try again.');
             } finally {
-                isProcessing = false;
-                detectBtn.disabled = false;
-                btnText.textContent = 'Detect Objects';
+                isLoading = false;
+                actionBtn.disabled = false;
+                btnContent.textContent = 'Detect Objects';
             }
         });
+
+        function renderResults(data) {
+            resultImage.src = data.image_url;
+
+            if (data.detections.length === 0) {
+                statsRow.style.display = 'none';
+                detectionsSection.style.display = 'none';
+                noDetections.style.display = 'block';
+            } else {
+                statsRow.style.display = 'grid';
+                detectionsSection.style.display = 'block';
+                noDetections.style.display = 'none';
+
+                statObjects.textContent = data.stats.object_count;
+                statClasses.textContent = data.stats.class_count;
+                statTime.textContent = data.stats.inference_time + 's';
+
+                const sorted = [...data.detections].sort((a, b) => b.confidence - a.confidence);
+
+                detectionsList.innerHTML = '';
+                sorted.forEach(det => {
+                    const pct = (det.confidence * 100).toFixed(1);
+                    const color = getClassColor(det.class);
+                    const barColor = det.confidence > 0.8 ? '#22c55e' : det.confidence > 0.6 ? '#f59e0b' : '#ef4444';
+
+                    const row = document.createElement('div');
+                    row.className = 'detection-row';
+                    row.innerHTML = `
+                        <span class="class-badge" style="background:${color.bg};color:${color.text}">${det.class}</span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width:${pct}%;background:${barColor}"></div>
+                        </div>
+                        <span class="confidence-value">${pct}%</span>
+                    `;
+                    detectionsList.appendChild(row);
+                });
+            }
+
+            results.classList.add('visible');
+        }
 
         function showError(msg) {
             errorMsg.textContent = msg;
